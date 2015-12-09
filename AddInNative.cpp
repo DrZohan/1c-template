@@ -7,7 +7,7 @@ uint32_t convFromShortWchar(wchar_t** Dest, const WCHAR_T* Source, uint32_t len 
 uint32_t getLenShortWcharStr(const WCHAR_T* Source);
 
 /*------------------------------------------------------------------------------------------*/
-//  Global Functions
+//	Global Functions
 /*------------------------------------------------------------------------------------------*/
 long GetClassObject (const wchar_t* wsName, IComponentBase** pInterface) {
 	if (*pInterface == NULL) {
@@ -30,9 +30,10 @@ long DestroyObject (IComponentBase** pInterface) {
 }
 //------------------------------------------------------------------------------------------
 const WCHAR_T* GetClassNames () {
-	static WCHAR_T* names = NULL;
-	if (names == NULL) {
-		::convToShortWchar(&names, g_kClassNames);
+	static WCHAR_T* names = new WCHAR_T[gClassNames.size() + 1];
+
+	if (names != NULL) {
+		names = AddInConvert::WstrToWchr(names, gClassNames);
 	}
 
 	return names;
@@ -40,7 +41,7 @@ const WCHAR_T* GetClassNames () {
 //------------------------------------------------------------------------------------------
 
 /*------------------------------------------------------------------------------------------*/
-//  Main Dll Class CAddInNative::
+//	Main Dll Class CAddInNative::
 /*------------------------------------------------------------------------------------------*/
 CAddInNative::CAddInNative () {
 }
@@ -51,7 +52,7 @@ CAddInNative::~CAddInNative () {
 
 
 /*------------------------------------------------------------------------------------------*/
-//  CAddInPQ::IInitDoneBase
+//	CAddInPQ::IInitDoneBase
 /*------------------------------------------------------------------------------------------*/
 bool CAddInNative::Init (void* pConnection) {
 	iConnect = (IAddInDefBase*)(pConnection);
@@ -79,10 +80,15 @@ void CAddInNative::Done () {
 
 
 /*------------------------------------------------------------------------------------------*/
-// CAddInPQ::ILanguageExtenderBase
+//	CAddInPQ::ILanguageExtenderBase
 /*------------------------------------------------------------------------------------------*/
 bool CAddInNative::RegisterExtensionAs (WCHAR_T** wsLanguageExt) {
-	return false; 
+	*wsLanguageExt = AddInMemory::AllocWchar(gExtensionName.size() + 1);
+	if (*wsLanguageExt == NULL) return false;
+
+	*wsLanguageExt = AddInConvert::WstrToWchr(*wsLanguageExt, gExtensionName);
+
+	return true;
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::GetNProps () {
@@ -147,12 +153,13 @@ bool CAddInNative::CallAsFunc(const long lMethodNum, tVariant* pvarRetValue, tVa
 //------------------------------------------------------------------------------------------
 
 /*------------------------------------------------------------------------------------------*/
-// CAddInPQ::LocaleBase
+//	CAddInPQ::LocaleBase
 /*------------------------------------------------------------------------------------------*/
 void CAddInNative::SetLocale (const WCHAR_T* loc) {
 #ifndef __linux__
 	_wsetlocale(LC_ALL, loc);
 #else
+/*
 	int size = 0;
 	char *mbstr = NULL;
 	wchar_t *tmpLoc = NULL;
@@ -170,64 +177,8 @@ void CAddInNative::SetLocale (const WCHAR_T* loc) {
 	setlocale(LC_ALL, mbstr);
 	delete[] tmpLoc;
 	delete[] mbstr;
+*/
 #endif
 }
 //------------------------------------------------------------------------------------------
 
-
-//------------------------------------------------------------------------------------------
-uint32_t convToShortWchar (WCHAR_T** Dest, const wchar_t* Source, uint32_t len) {
-	if (len == 0) {
-		len = ::wcslen(Source) + 1;
-	}
-
-	if (*Dest == NULL) {
-		*Dest = new WCHAR_T[len];
-	}
-
-	WCHAR_T* tmpShort = *Dest;
-	wchar_t* tmpWChar = (wchar_t*)(Source);
-	uint32_t res = 0;
-
-	::memset(*Dest, 0, len * sizeof(WCHAR_T));
-	do {
-		*tmpShort++ = (WCHAR_T)(*tmpWChar++);
-		++res;
-	} while (len-- && *tmpWChar);
-
-	return res;
-}
-//------------------------------------------------------------------------------------------
-uint32_t convFromShortWchar (wchar_t** Dest, const WCHAR_T* Source, uint32_t len) {
-	if (len == 0) {
-		len = getLenShortWcharStr(Source) + 1;
-	}
-
-	if (*Dest == NULL) {
-		*Dest = new wchar_t[len];
-	}
-
-	wchar_t* tmpWChar = *Dest;
-	WCHAR_T* tmpShort = (WCHAR_T*)(Source);
-	uint32_t res = 0;
-
-	::memset(*Dest, 0, len * sizeof(wchar_t));
-	do {
-		*tmpWChar++ = (wchar_t)(*tmpShort++);
-		++res;
-	} while (len-- && *tmpShort);
-
-	return res;
-}
-//------------------------------------------------------------------------------------------
-uint32_t getLenShortWcharStr (const WCHAR_T* Source) {
-	uint32_t res = 0;
-	WCHAR_T *tmpShort = (WCHAR_T*)(Source);
-
-	while (*tmpShort++) {
-		++res;
-	}
-
-	return res;
-}
-//------------------------------------------------------------------------------------------

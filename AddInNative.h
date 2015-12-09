@@ -16,10 +16,12 @@
 
 #endif	// __linux__
 
+#include <string>
 
 #include "ComponentBase.h"
 #include "AddInDefBase.h"
 #include "IMemoryManager.h"
+#include "AddInConvert.h"
 
 
 /*------------------------------------------------------------------------------------------*/
@@ -28,7 +30,8 @@
 
 static IMemoryManager* gMemory = NULL;
 
-static const wchar_t g_kClassNames[] = L"CAddInNative";     // "..|OtherClass1|OtherClass2"
+static const std::wstring gClassNames(L"CAddInNative");		// "..|OtherClass1|OtherClass2"
+static const std::wstring gExtensionName(L"AddInNativeExt");
 
 
 /*------------------------------------------------------------------------------------------*/
@@ -47,14 +50,12 @@ public:
 	virtual ~CAddInNative();
 public:
 	operator IComponentBase*() { return (IComponentBase*)(this); }
-public:
-		// IInitDoneBase
+public:		// IInitDoneBase
 	virtual bool ADDIN_API Init(void* pConnection);
 	virtual bool ADDIN_API setMemManager(void* pMemory);
 	virtual long ADDIN_API GetInfo();
 	virtual void ADDIN_API Done();
-public:
-		// ILanguageExtenderBase
+public:		// ILanguageExtenderBase
 	virtual bool ADDIN_API RegisterExtensionAs(WCHAR_T** wsLanguageExt);
 	virtual long ADDIN_API GetNProps();
 	virtual long ADDIN_API FindProp(const WCHAR_T* wsPropName);
@@ -71,11 +72,9 @@ public:
 	virtual bool ADDIN_API HasRetVal(const long lMethodNum);
 	virtual bool ADDIN_API CallAsProc(const long lMethodNum, tVariant* paParams, const long lSizeArray);
 	virtual bool ADDIN_API CallAsFunc(const long lMethodNum, tVariant* pvarRetValue, tVariant* paParams, const long lSizeArray);
-public:
-		// LocaleBase
+public:		// LocaleBase
 	virtual void ADDIN_API SetLocale(const WCHAR_T* loc);
-private:
-		// Attributes
+private:	// Attributes
 	IAddInDefBase* iConnect;
 	IAddInDefBase* iAsyncEvent;
 };
