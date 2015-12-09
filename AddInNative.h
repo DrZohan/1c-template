@@ -23,14 +23,16 @@
 
 
 /*------------------------------------------------------------------------------------------*/
-//  Constants
+//	Constants
 /*------------------------------------------------------------------------------------------*/
+
+static IMemoryManager* gMemory = NULL;
 
 static const wchar_t g_kClassNames[] = L"CAddInNative";     // "..|OtherClass1|OtherClass2"
 
 
 /*------------------------------------------------------------------------------------------*/
-//  class CAddInNative:
+//	class CAddInNative:
 /*------------------------------------------------------------------------------------------*/
 class CAddInNative : public IComponentBase {
 public:
@@ -74,6 +76,26 @@ public:
 	virtual void ADDIN_API SetLocale(const WCHAR_T* loc);
 private:
 		// Attributes
+	IAddInDefBase* iConnect;
+	IAddInDefBase* iAsyncEvent;
+};
+
+
+/*------------------------------------------------------------------------------------------*/
+//	static class AddInMemory: Allocate memory by 1C:Enterprise mechanism
+/*------------------------------------------------------------------------------------------*/
+class AddInMemory {
+public:
+	static WCHAR_T* AllocWchar(const uint32_t len) {
+		if (gMemory != NULL && len > 0) {
+			WCHAR_T* pWch;
+			if ( gMemory->AllocMemory((void**)&pWch, len * size(WCHAR_T)) ) {
+				return pWch;
+			}
+		}
+
+		return NULL;
+	}
 };
 
 #endif	// __ADDIN_NATIVE_H__

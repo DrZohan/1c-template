@@ -4,3 +4,5 @@
 The "1c-template" directory contains a template for creating components, developed by Native API technology. The "include" directory contains header files required for external component.
 
 2. Edit files: AddInNative.h, AddInNative.cpp dllmain.cpp. Add comments, format code to common style.
+
+3. Interface "IInitDoneBase" basic definition. Add static variable "gMemory" - a pointer to the 1C:Enterprise memory manager interface. Add static class AddInMemory - allocate memory for return values, wich can't be trasmitted completely through the stack.

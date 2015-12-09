@@ -54,11 +54,16 @@ CAddInNative::~CAddInNative () {
 //  CAddInPQ::IInitDoneBase
 /*------------------------------------------------------------------------------------------*/
 bool CAddInNative::Init (void* pConnection) {
-	return false;
+	iConnect = (IAddInDefBase*)(pConnection);
+	iAsyncEvent = (IAddInDefBase*)(pConnection);
+
+	return (iConnect != NULL);
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::setMemManager(void* pMemory) {
-	return false;
+	gMemory = (IMemoryManager*)(pMemory);
+
+	return (gMemory != NULL);
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::GetInfo () {
@@ -66,6 +71,9 @@ long CAddInNative::GetInfo () {
 }
 //------------------------------------------------------------------------------------------
 void CAddInNative::Done () {
+	iConnect = NULL;
+	iAsyncEvent = NULL;
+	gMemory = NULL;
 }
 //------------------------------------------------------------------------------------------
 
