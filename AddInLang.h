@@ -3,6 +3,12 @@
 #define __ADDIN_LANGUAGE_H__
 
 
+#include "AddInMemory.h"
+#if !defined(wstring) || !defined(string)
+#include <string>
+#endif
+
+
 /*------------------------------------------------------------------------------------------*/
 //  class CAddInData: Encapsulation of a tVariant type
 /*------------------------------------------------------------------------------------------*/
@@ -87,6 +93,78 @@ public:
 				memcpy(varValue, pVar, sizeof(tVariant));
 				break;
 		}
+	}
+public:
+		// Data access functions
+	TYPEVAR Type () const {
+		return TV_VT(varValue);
+	}
+	bool SetData (const tVariant* pVar) {
+		::operator=(pVar);
+
+		return true;
+	}
+	bool GetData (tVariant* pVar) {
+		if (pVar == NULL) {
+			return false;
+		}
+
+		switch (TV_VT(varValue)) {
+			case VTYPE_PWSTR:
+				TV_VT(pVar) = TV_VT(varValue);
+				TV_JOIN(pVar, wstrLen) = TV_JOIN(varValue, wstrLen);
+				TV_WSTR(pVar) = AddInMemory::AllocWchar(TV_JOIN(pVar, wstrLen));
+				memcpy(TV_WSTR(pVar), TV_WSTR(varValue), TV_JOIN(pVar, wstrLen) * sizeof(WCHAR_T));
+				break;
+			case VTYPE_PSTR:
+				TV_VT(pVar) = TV_VT(varValue);
+				TV_JOIN(pVar, strLen) = TV_JOIN(varValue, strLen);
+				TV_STR(pVar) = AddInMemory::AllocChar(TV_JOIN(pVar, strLen));
+				memcpy(TV_STR(pVar), TV_STR(varValue), TV_JOIN(pVar, strLen) * sizeof(char));
+				break;
+			default:
+				memcpy(pVar, varValue, sizeof(tVariant));
+				break;
+		}
+
+		return true;
+	}
+	bool GetWstring (std::wstring& value) {
+		switch  (TV_VT(varValue)) {
+			case VTYPE_PWSTR:
+				value = std::wstring(TV_WSTR(varValue));
+				break;
+			case VTYPE_PSTR:
+				value = AddInConvert::StrToWstr(std::string(TV_STR(varValue)));
+				break;
+			default:
+				return false;
+		}
+
+		return true;
+	}
+	bool GetString (std::string& value) {
+		switch (TV_VT(varValue)) {
+			case VTYPE_PWSTR:
+				value = AddInConvert::WstrToStr(std::wstring(TV_WSTR(varValue)));
+				break;
+			case VTYPE_PSTR:
+				value = std::string(TV_STR(varValue));
+				break;
+			default:
+				return false;
+		}
+
+		return true;
+	}
+	bool GetNumeric (long& value) {
+		if (TV_VT(varValue) != VTYPE_I4) {
+			return false;
+		}
+
+		value = TV_I4(varValue);
+
+		return true;
 	}
 private:
 		// Attributes
