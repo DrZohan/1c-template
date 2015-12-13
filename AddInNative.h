@@ -21,15 +21,13 @@
 #include "ComponentBase.h"
 #include "AddInDefBase.h"
 #include "IMemoryManager.h"
+#include "AddInMemory.h"
 #include "AddInConvert.h"
 
 
 /*------------------------------------------------------------------------------------------*/
 //	Constants
 /*------------------------------------------------------------------------------------------*/
-
-static IMemoryManager* gMemory = NULL;
-
 static const std::wstring gClassNames(L"CAddInNative");		// "..|OtherClass1|OtherClass2"
 static const std::wstring gExtensionName(L"AddInNativeExt");
 
@@ -77,24 +75,6 @@ public:		// LocaleBase
 private:	// Attributes
 	IAddInDefBase* iConnect;
 	IAddInDefBase* iAsyncEvent;
-};
-
-
-/*------------------------------------------------------------------------------------------*/
-//	static class AddInMemory: Allocate memory by 1C:Enterprise mechanism
-/*------------------------------------------------------------------------------------------*/
-class AddInMemory {
-public:
-	static WCHAR_T* AllocWchar(const uint32_t len) {
-		if (gMemory != NULL && len > 0) {
-			WCHAR_T* pWch;
-			if ( gMemory->AllocMemory((void**)&pWch, len * sizeof(WCHAR_T)) ) {
-				return pWch;
-			}
-		}
-
-		return NULL;
-	}
 };
 
 #endif	// __ADDIN_NATIVE_H__

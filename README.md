@@ -1,5 +1,7 @@
 # 1c-tempalte
 
+https://its.1c.ru/db/metod8dev#content:3221:hdoc
+
 1. Add original tempalte files: https://its.1c.ru/db/files/1CITS/EXE/VNCOMPS/VNCOMPS.zip?country=ru
 The "1c-template" directory contains a template for creating components, developed by Native API technology. The "include" directory contains header files required for external component.
 
@@ -11,3 +13,5 @@ The "1c-template" directory contains a template for creating components, develop
 
 5. "AddInLang.h" definition of accessory classes for easier use in main "AddIn" class.
 	a. Class AddInData - incapsulate "tVariant" structure in class. Add constructors (default, copy), destructor and assigment operator.
+
+6. Add "AddInMemory.h" for static class AddInMemory and two methods: "AllocWchar" and "AllocChar".
