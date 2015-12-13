@@ -88,7 +88,7 @@ public:
 	static WCHAR_T* AllocWchar(const uint32_t len) {
 		if (gMemory != NULL && len > 0) {
 			WCHAR_T* pWch;
-			if ( gMemory->AllocMemory((void**)&pWch, len * size(WCHAR_T)) ) {
+			if ( gMemory->AllocMemory((void**)&pWch, len * sizeof(WCHAR_T)) ) {
 				return pWch;
 			}
 		}
