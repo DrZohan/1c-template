@@ -12,6 +12,10 @@ The "1c-template" directory contains a template for creating components, develop
 4. Replace conversion functions by static class AddInConvert. Class convert between types: WCHAR_T <-> std::wstring and std::wstring <-> std::string. Change iternal varibales type from WCHAR_T to std::wstring. Add method ILanguageExtenderBase::RegisterExtensionAs definition.
 
 5. "AddInLang.h" definition of accessory classes for easier use in main "AddIn" class.
-	* Class AddInData - incapsulate "tVariant" structure in class. Add constructors (default, copy), destructor and assigment operator. Add some data access functions. Edit default constructor, assigment operator.
+	* Class AddInData - encapsulate "tVariant" structure in class. Add constructors (default, copy), destructor and assigment operator. Add some data access functions. Edit default constructor, assigment operator.
+	* Class AddInBase - base class for ILangiageExtender property and method classes. Store name of property or function in english and russian.
+	* Class AddInProp - ILanguageExtender property class.
+	* Class AddInMeth - ILanguageExtender method class.
+	* Class AddInLang - template container for AddInBase classes.
 
 6. Add "AddInMemory.h" for static class AddInMemory and two methods: "AllocWchar" and "AllocChar".

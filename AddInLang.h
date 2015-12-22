@@ -8,6 +8,11 @@
 #include <string>
 #endif
 
+#if !defined(vector)
+#include <vector>
+#include <algorithm>
+#endif
+
 
 /*------------------------------------------------------------------------------------------*/
 //  class CAddInData: Encapsulation of a tVariant type
@@ -174,6 +179,100 @@ private:
 		// Attributes
 	tVariant* varValue;
 };
+
+
+/*------------------------------------------------------------------------------------------*/
+//  class CAddInBase: Base class for property and method classes
+/*------------------------------------------------------------------------------------------*/
+enum eAlias {
+	eAliasRu = 0,
+	eAliasEn
+};
+
+class AddInBase {
+public:
+	AddInBase (const std::wstring& eng = L"", const std::wstring& rus = L"")
+		: wsNameEng(eng), wsNameRus(rus) { }
+	virtual ~AddInBase () { }
+public:
+	const std::wstring GetName (const long alias = eAliasEn) {
+		switch (alias) {
+			case eAliasEn:
+				return wsNameEng;
+			case eAliasRu:
+				return wsNameRus;
+			default:
+				return std::wstring();
+		}
+	}
+private:
+	std::wstring wsNameEng;
+	std::wstring wsNameRus;
+};
+
+/*------------------------------------------------------------------------------------------*/
+//  class CAddInProp: ILanguageExtender Property Class
+/*------------------------------------------------------------------------------------------*/
+class AddInProp : public AddInBase {
+public:
+	AddInProp (const std::wstring& eng = L"", const std::wstring& rus = L"", bool read = false, bool write = false)
+		: AddInBase(eng, rus), bReadable(read), bWritable(write), data() { }
+	virtual ~AddInProp () { }
+public:
+	bool IsReadable () const { return bReadable; }
+	bool IsWritable () const { return bWritable; }
+
+	bool SetData (const tVariant* value) { return data.SetData(value); }
+	bool GetData (tVariant* value) { return data.GetData(value); }
+	bool GetString (std::string& value) { return data.GetString(value); }
+	bool GetNumeric (long& value) { return data.GetNumeric(value); }
+
+private:
+	bool bReadable;
+	bool bWritable;
+	AddInData data;
+};
+
+/*------------------------------------------------------------------------------------------*/
+//  class CAddInMeth: ILanguageExtender Method Class
+/*------------------------------------------------------------------------------------------*/
+class AddInMeth : public AddInBase {
+public:
+	AddInMeth (const std::wstring& eng = L"", const std::wstring& rus = L"", bool func = false, long param = 0)
+		: AddInBase(eng, rus), bFunction(func), nParam(param) { }
+	virtual ~AddInMeth () { }
+public:
+	bool IsFunction () const { return bFunction; }
+	long GetNParams () const { long nParam; }
+private:
+	bool bFunction;
+	long nParam;
+};
+
+/*------------------------------------------------------------------------------------------*/
+//  class CAddInLang: Template Container for AddInBase Classes
+/*------------------------------------------------------------------------------------------*/
+template<class T> class AddInLang {
+public:
+	AddInLang () : vArray() { }
+	~AddInLang () { }
+public:
+	long Size () const { return vArray.size(); }
+	void Push (const T& obj) { vArray.push_back(obj); }
+	T& operator[] (long pos) { return vArray.at(pos); }
+	const long Find (const std::wstring& name) const {
+		for (std::vector<T>::const_iterator it = vArray.begin(); it != vArray.end(); ++it) {
+			if (!name.compare( (static_cast<AddInBase>(*it)).GetName(eAliasEn) ) || !name.compare( (static_cast<AddInBase>(*it)).GetName(eAliasRu) )) {
+				return std::distance(vArray.begin(), it);
+			}
+		}
+
+		return -1;
+	}
+private:
+	std::vector<T> vArray;
+};
+
 
 
 #endif	// __ADDIN_LANGUAGE_H__
