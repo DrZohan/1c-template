@@ -17,10 +17,26 @@ public:
 		// Default constructor
 	AddInData (const tVariant* pVar = NULL) : varValue(NULL) {
 		varValue = new tVariant;
-		if (pVar == NULL) {
-			tVarInit(varValue);
-		} else {
-			
+		tVarInit(varValue);
+
+		if (pVar != NULL) {
+			switch (TV_VT(pVar)) {
+				case VTYPE_PWSTR:
+					TV_VT(varValue) = TV_VT(pVar);
+					TV_JOIN(varValue, wstrLen) = TV_JOIN(pVar, wstrLen);
+					TV_WSTR(varValue) = new WCHAR_T[TV_JOIN(varValue, wstrLen)];
+					memcpy(TV_WSTR(varValue), TV_WSTR(pVar), TV_JOIN(varValue, wstrLen) * sizeof(WCHAR_T));
+					break;
+				case VTYPE_PSTR:
+					TV_VT(varValue) = TV_VT(pVar);
+					TV_JOIN(varValue, strLen) = TV_JOIN(pVar, strLen);
+					TV_STR(varValue) = new char[TV_JOIN(varValue, strLen)];
+					memcpy(TV_STR(varValue), TV_STR(pVar), TV_JOIN(varValue, strLen) * sizeof(char));
+					break;
+				default:
+					memcpy(varValue, pVar, sizeof(tVariant));
+					break;
+			}
 		}
 	}
 		// Copy constructor
@@ -60,11 +76,14 @@ public:
 		delete varValue;
 	}
 public:
-	AddInData& operator= (const tVariant* pVar) {
-		if (this == pVar) {
-			return *this;
+	AddInData& operator= (const AddInData& pObj) {
+		if (this != &pObj) {
+			AddInData(pObj);
 		}
 
+		return *this;
+	}
+	AddInData& operator= (const tVariant* pVar) {
 		switch (TV_VT(varValue)) {
 			case VTYPE_PWSTR:
 				delete [] TV_WSTR(varValue);
@@ -75,24 +94,9 @@ public:
 		}
 
 		tVarInit(varValue);
+		AddInData(pVar);
 
-		switch (TV_VT(pVar)) {
-			case VTYPE_PWSTR:
-				TV_VT(varValue) = TV_VT(pVar);
-				TV_JOIN(varValue, wstrLen) = TV_JOIN(pVar, wstrLen);
-				TV_WSTR(varValue) = new WCHAR_T[TV_JOIN(varValue, wstrLen)];
-				memcpy(TV_WSTR(varValue), TV_WSTR(pVar), TV_JOIN(varValue, wstrLen) * sizeof(WCHAR_T));
-				break;
-			case VTYPE_PSTR:
-				TV_VT(varValue) = TV_VT(pVar);
-				TV_JOIN(varValue, strLen) = TV_JOIN(pVar, strLen);
-				TV_STR(varValue) = new char[TV_JOIN(varValue, strLen)];
-				memcpy(TV_STR(varValue), TV_STR(pVar), TV_JOIN(varValue, strLen) * sizeof(char));
-				break;
-			default:
-				memcpy(varValue, pVar, sizeof(tVariant));
-				break;
-		}
+		return *this;
 	}
 public:
 		// Data access functions
