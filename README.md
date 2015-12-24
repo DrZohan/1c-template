@@ -19,3 +19,5 @@ The "1c-template" directory contains a template for creating components, develop
 	* Class AddInLang - template container for AddInBase classes.
 
 6. Add "AddInMemory.h" for static class AddInMemory and two methods: "AllocWchar" and "AllocChar".
+
+7. Add iProp and iMeth containers. Add "ILanguageExtender" definition in main "AddIn" class. Simplify addition of new properties and methods. Example in main "AddIn" class constructor.

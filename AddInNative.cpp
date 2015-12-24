@@ -2,10 +2,6 @@
 #include "AddInNative.h"
 
 
-uint32_t convToShortWchar(WCHAR_T** Dest, const wchar_t* Source, uint32_t len = 0);
-uint32_t convFromShortWchar(wchar_t** Dest, const WCHAR_T* Source, uint32_t len = 0);
-uint32_t getLenShortWcharStr(const WCHAR_T* Source);
-
 /*------------------------------------------------------------------------------------------*/
 //	Global Functions
 /*------------------------------------------------------------------------------------------*/
@@ -43,7 +39,9 @@ const WCHAR_T* GetClassNames () {
 /*------------------------------------------------------------------------------------------*/
 //	Main Dll Class CAddInNative::
 /*------------------------------------------------------------------------------------------*/
-CAddInNative::CAddInNative () {
+CAddInNative::CAddInNative () : iConnect(NULL), iAsyncEvent(NULL), iProp(), iMeth() {
+	//iProp.Push(AddInProp(L"PropertyEng", L"PropertyRus", false, false));
+	//iMeth.Push(AddInMeth(L"MethodEng", L"MethodRus", false, 0));
 }
 //------------------------------------------------------------------------------------------
 CAddInNative::~CAddInNative () {
@@ -92,63 +90,120 @@ bool CAddInNative::RegisterExtensionAs (WCHAR_T** wsLanguageExt) {
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::GetNProps () {
-	return eLastProp;
+	return iProp.Size();
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::FindProp (const WCHAR_T* wsPropName) {
-	return -1;
+	return iProp.Find(wsPropName);
 }
 //------------------------------------------------------------------------------------------
 const WCHAR_T* CAddInNative::GetPropName (long lPropNum, long lPropAlias) {
-	return 0;
+	if (lPropNum >= iProp.Size() || lPropNum < 0) {
+		return NULL;
+	}
+
+	const std::wstring wstr(iProp[lPropNum].GetName(lPropAlias));
+	WCHAR_T* wsRetVal = AddInMemory::AllocWchar(wstr.size() + 1);
+
+	wsRetVal = AddInConvert::WstrToWchr(wsRetVal, wstr);
+
+	return wsRetVal;
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::GetPropVal (const long lPropNum, tVariant* pvarPropVal) {
-	return false;
+	if (lPropNum >= iProp.Size() || lPropNum < 0) {
+		return false;
+	}
+	if (!iProp[lPropNum].IsReadable()) {
+		return false;
+	}
+
+	return iProp[lPropNum].GetData(pvarPropVal);
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::SetPropVal (const long lPropNum, tVariant* varPropVal) {
-	return false;
+	if (lPropNum >= iProp.Size() || lPropNum < 0) {
+		return false;
+	}
+	if (!iProp[lPropNum].IsWritable()) {
+		return false;
+	}
+
+	return iProp[lPropNum].SetData(pvarPropVal);
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::IsPropReadable (const long lPropNum) {
-	return false;
+	if (lPropNum >= iProp.Size() || lPropNum < 0) {
+		return false;
+	}
+
+	return iProp[lPropNum].IsReadable();
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::IsPropWritable (const long lPropNum) {
-	return false;
+	if (lPropNum >= iProp.Size() || lPropNum < 0) {
+		return false;
+	}
+
+	return iProp[lPropNum].IsWritable();
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::GetNMethods () {
-	return eLastMethod;
+	return iMeth.Size();
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::FindMethod (const WCHAR_T* wsMethodName) {
-	return -1;
+	return iMeth.Find(wsMethodName);
 }
 //------------------------------------------------------------------------------------------
 const WCHAR_T* CAddInNative::GetMethodName (const long lMethodNum, const long lMethodAlias) {
-	return 0;
+	if (lMethodNum >= iMeth.Size() || lMethodNum < 0) {
+		return NULL;
+	}
+
+	const std::wstring wstr(iMeth[lMethodNum].GetName(lMethodAlias));
+	WCHAR_T* wsRetVal = AddInMemory::AllocWchar(wstr.size() + 1);
+
+	wsRetVal = AddInConvert::WstrToWchr(wsRetVal, wstr);
+
+	return wsRetVal;
 }
 //------------------------------------------------------------------------------------------
 long CAddInNative::GetNParams (const long lMethodNum) {
-	return 0;
+	if (lMethodNum >= iMeth.Size() || lMethodNum < 0) {
+		return 0;
+	}
+
+	return iMeth[lMethodNum].GetNParams();
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::GetParamDefValue (const long lMethodNum, const long lParamNum, tVariant *pvarParamDefValue) {
+	TV_VT(pvarParamDefValue) = VTYPE_EMPTY;
 	return false;
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::HasRetVal (const long lMethodNum) {
-	return false;
+	if (lMethodNum >= iMeth.Size() || lMethodNum < 0) {
+		return false;
+	}
+
+	return iMeth[lMethodNum].IsFunction();
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::CallAsProc (const long lMethodNum, tVariant* paParams, const long lSizeArray) {
-	return false;
+	if (lMethodNum >= iMeth.Size() || lMethodNum < 0) {
+		return false;
+	}
+
+	return true;
 }
 //------------------------------------------------------------------------------------------
 bool CAddInNative::CallAsFunc(const long lMethodNum, tVariant* pvarRetValue, tVariant* paParams, const long lSizeArray) {
-	return false;
+	if (lMethodNum >= iMeth.Size() || lMethodNum < 0) {
+		return false;
+	}
+
+	return true;
 }
 //------------------------------------------------------------------------------------------
 

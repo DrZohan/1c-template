@@ -23,6 +23,7 @@
 #include "IMemoryManager.h"
 #include "AddInMemory.h"
 #include "AddInConvert.h"
+#include "AddInLang.h"
 
 
 /*------------------------------------------------------------------------------------------*/
@@ -36,13 +37,6 @@ static const std::wstring gExtensionName(L"AddInNativeExt");
 //	class CAddInNative:
 /*------------------------------------------------------------------------------------------*/
 class CAddInNative : public IComponentBase {
-public:
-	enum Props {
-		eLastProp		// Always last
-	};
-	enum Methods {
-		eLastMethod		// Always last
-	};
 public:
 	CAddInNative();
 	virtual ~CAddInNative();
@@ -75,6 +69,8 @@ public:		// LocaleBase
 private:	// Attributes
 	IAddInDefBase* iConnect;
 	IAddInDefBase* iAsyncEvent;
+	AddInLang<AddInProp> iProp;
+	AddInLnag<AddInMeth> iMeth;
 };
 
 #endif	// __ADDIN_NATIVE_H__
